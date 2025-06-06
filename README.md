@@ -1,60 +1,55 @@
-# Fitness Studio Booking API 🧘‍♀️🏃‍♂️
 
-A production-style FastAPI service that lets clients **view classes** and **book spots** for a fictional fitness studio.  
-Uses **SQLite** for persistence, stores datetimes in **UTC**, and converts on-the-fly to any IANA timezone.
+# Fitness Studio Booking API (Modular Version)
 
----
+This version refactors the original single-file demo into a cleaner Python package **`fitness_api`** and adds a minimal Pytest suite.
 
-## 📂  Project layout
+## 📦 Project layout
 
+```
+fitness_api/
+    core/config.py           # global settings
+    db/session.py            # engine & session
+    models.py                # ORM tables
+    schemas.py               # Pydantic models
+    seed.py                  # initial data
+    routers/                 # route modules
+    utils/timezone.py        # timezone helper
+    main.py                  # FastAPI app
+tests/
+    test_api.py              # quick smoke tests
+```
 
----
-
-## ⚡ Quick-start
-
-### 1. Create a virtual-env & install deps
+## 🛠️ Setup & Run
 
 ```bash
 python -m venv venv
-# Windows
-venv\Scripts\activate
-# macOS / Linux
-source venv/bin/activate
-
+source venv/bin/activate            # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn fitness_api.main:app --reload
-uvicorn fitness_api.main:app --reload
+```
 
+Swagger docs at `http://127.0.0.1:8000/docs`.
 
-Purpose	Method & Path	Complete URL
-Swagger UI (interactive docs)	—	http://127.0.0.1:8000/docs
-ReDoc docs	—	http://127.0.0.1:8000/redoc
-List upcoming classes (default IST)	GET /classes	http://127.0.0.1:8000/classes
-List classes in another zone (e.g. New York)	GET /classes?tz=America/New_York	http://127.0.0.1:8000/classes?tz=America/New_York
-Book a class	POST /bookings	http://127.0.0.1:8000/bookings
-All bookings for a client	GET /bookings?email=alice@example.com	http://127.0.0.1:8000/bookings?email=alice@example.com
-Health check	GET /health	http://127.0.0.1:8000/health
+## 🧪 Run Tests
 
----------post-------------
+```bash
+pytest -q
+```
 
-curl -X POST http://127.0.0.1:8000/bookings \
-  -H "Content-Type: application/json" \
-  -d '{
-        "class_id": 1,
-        "client_name": "Jane Doe",
-        "client_email": "jane@example.com"
-      }'
-------------------windows---------------
-# Build the JSON body
-$body = @{
-    class_id    = 1
-    client_name = "Jane Doe"
-    client_email= "jane@example.com"
-} | ConvertTo-Json
+The tests spin up the app with **TestClient**, verify `/classes` returns seed data and that booking endpoint works end‑to‑end.
 
-# Send the POST request
-Invoke-RestMethod `
-  -Uri "http://127.0.0.1:8000/bookings" `
-  -Method Post `
-  -Body $body `
-  -ContentType "application/json"
+## 📋 Endpoints
+
+* `GET /classes?tz=America/New_York` – list upcoming classes in any timezone.
+* `POST /bookings` – book a spot:
+  ```json
+  {
+    "class_id": 1,
+    "client_name": "Alice",
+    "client_email": "alice@example.com"
+  }
+  ```
+* `GET /bookings?email=alice@example.com` – all bookings for a user.
+* `GET /health` – simple health probe.
+
+Happy coding! 🎉
